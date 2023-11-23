@@ -2,6 +2,7 @@ import networkx as nx
 from typing import NamedTuple
 from queues import Queue, Stack
 from collections import deque
+from queues import MutableMinHeap
 
 # define a class to store the City information
 # City is a node in the graph
@@ -141,6 +142,19 @@ def traverse_network_dfs(network, root):
         except StopIteration:
             q.dequeue() # once neighbors are fully iterated, remove the element from the stack
 
+def depth_first_traverse(graph, source, order_by=None):
+    stack = Stack(source)
+    visited = set()
+    while stack:
+        if (node := stack.dequeue()) not in visited:
+            yield node
+            visited.add(node)
+            neighbors = list(graph.neighbors(node))
+            if order_by:
+                neighbors.sort(key=order_by)
+            for neighbor in reversed(neighbors):
+                stack.enqueue(neighbor)
+
 def retrace(previous, source, destination):
     path = deque()
 
@@ -179,4 +193,42 @@ def shortest_path(network, source, destination, order_by=None):
                 previous[neighbor] = node
                 if neighbor == destination:
                     return retrace(previous, source, destination)
-    return []
+    return None
+
+def connected(graph, source, destination):
+    return shortest_path(graph, source, destination) is not None
+
+def dijkstra_shortest_path(graph, source, destination, weight_factory):
+    """search the shortest path between two nodes in a graph, if there are multiple shortest paths, return the first one
+
+    Args:
+        graph (nx.graph): a graph
+        source (source node): source node
+        destination (end node): end node
+        weight_factory (callable function): a callable function(converter) to get the weight of the edge
+
+    Returns:
+        list: a list of nodes, from source to destination
+    """
+    previous = {}
+    visited = set()
+
+    unvisited = MutableMinHeap()
+    for node in graph.nodes:
+        unvisited[node] = float('inf') # initiliaze all nodes with infinity, except for the source node
+    unvisited[source] = 0
+
+    while unvisited:
+        visited.add(node := unvisited.dequeue())
+        # equialent to:
+        # node = unvisited.dequeue()
+        # visited.add(node)
+        for neighbor, weights in graph[node].items():
+            if neighbor not in visited:
+                weight = weight_factory(weights)
+                new_distance = unvisited[node] + weight
+                if new_distance < unvisited[neighbor]:
+                    unvisited[neighbor] = new_distance # update the priority, after this, MutableMinHeap will re-order elements
+                    previous[neighbor] = node
+
+    return retrace(previous, source, destination)

@@ -58,6 +58,9 @@ class Element:
 
 
 class MutableMinHeap(IterableMixin):
+    # 使用任意类型的value作为key，可以通过__getitem__和__setitem__来访问priority
+    # value作为dict的key，本身是immutable的
+    # 当priority发生变化时，先获取element，更新priority，然后重新进行heapify
     def __init__(self):
         super().__init__()
         self._elements_by_value = {}
@@ -67,7 +70,7 @@ class MutableMinHeap(IterableMixin):
     def __setitem__(self, unique_value, priority):
         if unique_value in self._elements_by_value:
             self._elements_by_value[unique_value].priority = priority
-            heapify(self._elements)
+            heapify(self._elements) # 重新进行heapify
         else:
             element = Element(priority, next(self._counter), unique_value)
             self._elements_by_value[unique_value] = element

@@ -77,12 +77,12 @@ class Worker(threading.Thread):
         self.product = None
         self.working = False
         self.progress = 0
-        sleep(randint(1, 3))
+        sleep(randint(1, 3)) # sleep for a random time
 
     def simulate_work(self):
         self.working = True
         self.progress = 0
-        delay = randint(1, 1 + 15 // self.speed)
+        delay = randint(1, 1 + 15 // self.speed) # select a random work speed
         for _ in range(100):
             sleep(delay / 100)
             self.progress += 1
@@ -107,6 +107,9 @@ class Consumer(Worker):
             self.product = self.buffer.get()
             self.simulate_work()
             self.buffer.task_done()
+            # Each time you get something from a synchronized queue, its internal counter increases to let other threads know the queue hasn’t been drained yet. 
+            # Therefore, it’s important to mark a dequeued task as done when you’re finished processing it unless you don’t have any threads joining the queue. 
+            # Doing so decreases the queue’s internal counter.
             self.simulate_idle()
 
 
@@ -153,7 +156,7 @@ class View:
 
 
 def main(args):
-    buffer = QUEUE_TYPES[args.queue]()
+    buffer = QUEUE_TYPES[args.queue](maxsize=10) # create a queue with a maxsize of 10, producer will be blocked if queue is full
     products = PRIORITIZED_PRODUCTS if args.queue == "heap" else PRODUCTS
     producers = [
         Producer(args.producer_speed, buffer, products)

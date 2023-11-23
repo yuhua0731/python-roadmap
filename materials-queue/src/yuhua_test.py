@@ -53,10 +53,29 @@ print("🎉🎉🎉🎉🎉🎉🎉🎉🎉 DFS")
 city1 = nodes["aberdeen"]
 city2 = nodes["perth"]
 
-for i, path in enumerate(nx.all_shortest_paths(network, city1, city2), 1):
-    print(f"{i}.", " → ".join(city.name for city in path))
+# for i, path in enumerate(nx.all_shortest_paths(network, city1, city2), 1):
+#     print(f"{i}.", " → ".join(city.name for city in path))
 
 self_implementation = " → ".join([i.name for i in shortest_path(network, city1, city2)])
-built_in_shortest_paths = " → ".join([i.name for i in nx.shortest_path(network, city1, city2)])
-assert self_implementation == built_in_shortest_paths, "The implementation is wrong"
+built_in_shortest_path = " → ".join([i.name for i in nx.shortest_path(network, city1, city2)])
+assert self_implementation == built_in_shortest_path, "The implementation is wrong"
 print("🎉🎉🎉🎉🎉🎉🎉🎉🎉 the shortest path")
+
+# 检验编写的connected是否正确，与networkx自带的has_path进行比较
+city1 = nodes["aberdeen"]
+city2 = nodes["perth"]
+city3 = nodes["derry"]
+
+self_implementation = connected(network, city1, city2)
+built_in_connected = nx.has_path(network, city1, city2)
+assert self_implementation == built_in_connected, "The implementation is wrong"
+self_implementation = connected(network, city1, city3)
+built_in_connected = nx.has_path(network, city1, city3)
+assert self_implementation == built_in_connected, "The implementation is wrong"
+print("🎉🎉🎉🎉🎉🎉🎉🎉🎉 connected")
+
+# print(get_neighbors_and_distance_of_node(network, nodes["london"]))
+self_implementation = " → ".join([city.name for city in dijkstra_shortest_path(network, nodes["london"], nodes["edinburgh"], lambda x: int(x["distance"]))])
+built_in_dijkstra_shortest_path = " → ".join([city.name for city in nx.dijkstra_path(network, nodes["london"], nodes["edinburgh"], lambda node1, node2, weights: int(weights["distance"]))])
+assert self_implementation == built_in_dijkstra_shortest_path, "The implementation is wrong"
+print("🎉🎉🎉🎉🎉🎉🎉🎉🎉 dijkstra")
