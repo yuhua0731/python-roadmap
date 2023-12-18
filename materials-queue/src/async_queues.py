@@ -74,7 +74,7 @@ async def worker(worker_id, session, queue, links, max_depth):
             if depth < max_depth: # depth + 1 <= max_depth
                 if html := await fetch_html(session, url):
                     for link_url in parse_links(url, html):
-                        print(f'{url} -> {link_url}')
+                        # print(f'{url} -> {link_url}')
                         await queue.put(Job(link_url, depth + 1))
         except aiohttp.ClientError:
             print(f"[{worker_id} failed at {url=}]", file=sys.stderr)
