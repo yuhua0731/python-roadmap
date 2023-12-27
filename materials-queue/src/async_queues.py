@@ -17,7 +17,7 @@ class Job(NamedTuple):
 
     def __lt__(self, other):
         if isinstance(other, Job):
-            return len(self.url) < len(other.url)
+            return len(self.url) < len(other.url) # 优先级：url长度
 
 
 async def main(args):
@@ -25,9 +25,9 @@ async def main(args):
     try:
         links = Counter()
         # uncomment one of the following lines to use a different queue
-        queue = asyncio.Queue()
+        # queue = asyncio.Queue()
         # queue = asyncio.LifoQueue()
-        # queue = asyncio.PriorityQueue()
+        queue = asyncio.PriorityQueue()
         tasks = [
             asyncio.create_task(
                 worker(
@@ -72,8 +72,8 @@ async def worker(worker_id, session, queue, links, max_depth):
             #             await queue.put(Job(link_url, depth + 1))
             
             if depth < max_depth: # depth + 1 <= max_depth
-                if html := await fetch_html(session, url):
-                    for link_url in parse_links(url, html):
+                if html := await fetch_html(session, url): # fetch html from url, within session
+                    for link_url in parse_links(url, html): # parse links from html, 组合拳
                         # print(f'{url} -> {link_url}')
                         await queue.put(Job(link_url, depth + 1))
         except aiohttp.ClientError:
